@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Manual",
+    "slug": "Manual",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
