@@ -1,62 +1,22 @@
 import React, { useState } from 'react';
-import { StyleSheet, View, Button, Text, Image } from 'react-native';
+import { StyleSheet, View, Button, Text, Image, TouchableOpacity } from 'react-native';
 import {Video} from 'expo-av';
 import { Picker } from '@react-native-picker/picker';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 
 const problemsDatabase = {
-  "Célula 1": {
-    "MADAG": {
-      "Problema A1": { image: require('./Assets/Problems/problemaA1.png') },
-      "Problema A2": { image: require('./Assets/Problems/problemaA2.png') }},
-    "CER 400": ["Problema B1", "Problema B2"],
-    "DUBUIT 1": ["Problema B1", "Problema B2"],
-    "DUBUIT 2": ["Problema B1", "Problema B2"],
-    "ISIMAT": ["Problema B1", "Problema B2"],
-  },
-  "Célula 2": {
-    "BREYER 1": ["Problema C1", "Problema C2"],
-    "BREYER 2": ["Problema C1", "Problema C2"],
-    "POLYTYPE 1": ["Problema C1", "Problema C2"],
-    "POLYTYPE 2": ["Problema C1", "Problema C2"],
-    "PTH 40": ["Problema C1", "Problema C2"],
-    "PTH 80": ["Problema C1", "Problema C2"],
-  },
-  "Célula 3": {
-    "BREYER": ["Problema C1", "Problema C2"],
-    "POLYTYPE": ["Problema C1", "Problema C2"],
-    "PTH": ["Problema C1", "Problema C2"],
-    "RHM": ["Problema C1", "Problema C2"],
-    "TEXA": ["Problema C1", "Problema C2"],
-  },
-  "Célula 4": {
-    "BREYER": ["Problema C1", "Problema C2"],
-    "POLYTYPE": ["Problema C1", "Problema C2"],
-    "PTH": ["Problema C1", "Problema C2"],
-    "RHM": ["Problema C1", "Problema C2"],
-    "TEXA": ["Problema C1", "Problema C2"],
-  },
-  "Célula 5": {
-    "BREYER": ["Problema C1", "Problema C2"],
-    "POLYTYPE": ["Problema C1", "Problema C2"],
-    "PTH": ["Problema C1", "Problema C2"],
-    "RHM": ["Problema C1", "Problema C2"],
-    "TEXA": ["Problema C1", "Problema C2"],
-  },
-  "Célula 6": {
-    "BREYER": ["Problema C1", "Problema C2"],
-    "POLYTYPE": ["Problema C1", "Problema C2"],
-    "PTH": ["Problema C1", "Problema C2"],
-    "RHM": ["Problema C1", "Problema C2"],
-    "TEXA": ["Problema C1", "Problema C2"],
-  },
+
   "Célula 8": {
     "DXL": {
       "Cor fora da cartela e mancha": { 
         image: require('./Assets/Problems/mancha1.jpeg'),
-        description: "1° - Verificar se a cor não está no tom que deveria"+"\n"+"2° - Teste de linha",
-        solution: "1° - Verificar se a cor não está no tom que deveria"+"\n"+"2° - Teste de linha",
+        description: [
+          "1° - Verificar se a cor não está no tom que deveria","\n","\n",
+          "2° - Teste de linha"],
+        solution:  [
+          "1° - Verificar se a cor não está no tom que deveria",
+          "2° - Teste de linha"],
         video: require('./Assets/Videos/Problema.mp4')},
       "Delâminação, aderência e flexibilidade do filme": { image: require('./Assets/Problems/problemaA2.png') },
       "Emenda aberta": { image: require('./Assets/Problems/problemaA2.png') },
@@ -73,20 +33,9 @@ const problemsDatabase = {
       "Tubo sextavado": { image: require('./Assets/Problems/problemaA2.png') },
       "Variação do verniz": { image: require('./Assets/Problems/problemaA2.png') }
     },
-    "PTH": ["Problema C1", "Problema C2"],
-    "TCX": ["Problema C1", "Problema C2"],
-    "TEXA": ["Problema C1", "Problema C2"],
+
   },
-  "Célula 9": {
-    "FLEXO": ["Problema C1", "Problema C2"],
-  },
-  "Célula 10": {
-    "DXL": ["Problema C1", "Problema C2"],
-    "PTH": ["Problema C1", "Problema C2"],
-    "TCX": ["Problema C1", "Problema C2"],
-    "TEXA": ["Problema C1", "Problema C2"],
-  },
-  // ... adicione mais conforme necessário
+
 };
 
 const HomeScreen = ({ navigation }) => {
@@ -162,12 +111,31 @@ const HomeScreen = ({ navigation }) => {
 }
 
 const SolutionScreen = ({ route }) => {
+
+  const { problemName, problemSolution, problemImage, problemVideo } = route.params;
+  const [solutionIsEnabled, setSolutionIsEnabled] = useState(false);
+
+  // Função para lidar com o clique no botão de verificação
+  const handleCheckPress = (index) => {
+    // Implemente a lógica para lidar com o clique no botão de verificação, se necessário
+    console.log(`Check pressed for solution line ${index}`);
+    setSolutionIsEnabled(true); // Atualiza o estado para habilitar as linhas de solução
+  };
+
   return (
     <View style={styles.container}>
       <Text>{route.params.problemName}:</Text>
-      <Text>{route.params.problemSolution}</Text>
+      
+      {/* Itere sobre as soluções e renderize um componente SolutionLine para cada uma */}
+      {route.params.problemSolution.map((solution, index) => (
+        <SolutionLine key={index} text={solution} onPressCheck={() => handleCheckPress(index)} 
+        isEnabled={solutionIsEnabled} // Defina a condição adequada aqui
+        />
+      ))}
+      
       <Image source={route.params.problemImage} 
-        style={{ width: '100%', height: 20, resizeMode: 'contain' }} 
+        style={{ width: '100%', height: 20, resizeMode: 'contain' }}
+        isEnabled={solutionIsEnabled} // Defina a condição adequada aqui 
         />
       <Video 
         source={route.params.problemVideo} 
@@ -175,6 +143,28 @@ const SolutionScreen = ({ route }) => {
         useNativeControls
         resizeMode="contain"
       />
+    </View>
+  );
+}
+
+const SolutionLine = ({ text, onPressCheck }) => {
+  const [isEnabled, setIsEnabled] = useState(false);
+
+  const handlePress = () => {
+    setIsEnabled(true); // Habilita o botão quando clicado
+    onPressCheck(); // Chama a função de clique do botão
+  };
+
+  return (
+    <View style={styles.solutionLine}>
+      <Text style={styles.solutionText}>{text}</Text>
+      <TouchableOpacity 
+        style={isEnabled ? styles.enabledButton : styles.disabledButton} 
+        onPress={handlePress} 
+        disabled={isEnabled} // Desabilita o botão se já estiver habilitado
+      >
+        <Text style={styles.buttonText}>✔</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -196,7 +186,17 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 20,
-  }
+  },
+  solutionLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  solutionText: {
+    flex: 1,
+    marginRight: 8,
+  },
 });
 
 export default App;
